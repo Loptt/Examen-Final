@@ -1,0 +1,9 @@
+div {
+    margin: 10px;
+}
+
+.movie {
+    margin: 20px;
+    border: 2px solid #cccccc;
+    padding-left: 20px;
+}

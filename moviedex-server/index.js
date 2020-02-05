@@ -2,7 +2,11 @@ let express = require( 'express' );
 let bodyParser = require( 'body-parser' );
 let mongoose = require( 'mongoose' );
 let jsonParser = bodyParser.json();
+let uuid = require('uuid/v4');
+let morgan = require('morgan');
 let { DATABASE_URL, PORT } = require( './config' );
+
+let {MovieController} = require('./model');
 
 let app = express();
 
@@ -16,7 +20,47 @@ app.use(function(req, res, next) {
 	next();
 });
 
-/* Tu código va aquí */
+app.use(morgan('dev'));
+
+app.get('/api/moviedex', (req, res) => {
+	MovieController.getAll()
+		.then(movies => {
+			return res.status(200).json(movies);
+		})
+		.catch(error => {
+			res.statusMessage = 'Database error';
+			return res.status(500).send();
+		})
+});
+
+app.post('/api/moviedex', jsonParser, (req, res) => {
+	let {film_title, year, rating} = req.body;
+
+	console.log(req.body);
+
+	if (film_title == undefined || year == undefined || rating == undefined) {
+		res.statusMessage = 'Incomplete parameters to create movie';
+		return res.status(406).send();
+	}
+
+	let film_ID = uuid();
+
+	let newMovie = {
+		film_ID,
+		film_title,
+		year,
+		rating
+	}
+
+	MovieController.create(newMovie)
+		.then(nm => {
+			return res.status(201).json(nm);
+		})
+		.catch(error => {
+			res.statusMessage = "Database error";
+			return res.status(500).send();
+		})
+});
 
 let server;
 
